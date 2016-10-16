@@ -66,7 +66,7 @@ func (d *Driver) Init() error {
 		os.MkdirAll(d.directory, 0700)
 	}
 
-	emptyIndex := make(map[time.Time]ejrnl.Entry)
+	emptyIndex := make(map[time.Time]string)
 	data, err := json.Marshal(emptyIndex)
 	if err != nil {
 		return fmt.Errorf("Failed to encode the empty index to json because %s", err)
