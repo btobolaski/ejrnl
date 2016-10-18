@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	"ejrnl"
 )
@@ -53,5 +54,62 @@ func TestDriverInit(t *testing.T) {
 	defer os.RemoveAll(conf.StorageDirectory)
 	if err != nil {
 		t.Error(err)
+	}
+}
+
+func compareEntries(first, second ejrnl.Entry) bool {
+	if first.Date != second.Date {
+		return false
+	}
+	if first.Body != second.Body {
+		return false
+	}
+	if first.Id != second.Id {
+		return false
+	}
+	if len(first.Tags) != len(second.Tags) {
+		return false
+	}
+	for i := range first.Tags {
+		if first.Tags[i] != second.Tags[i] {
+			return false
+		}
+	}
+	return true
+}
+
+func TestDriverRoundtrip(t *testing.T) {
+	conf := ejrnl.Config{
+		StorageDirectory: "../../../roundtrip-test",
+		Salt:             makeSalt(32),
+		Pow:              15,
+	}
+
+	d, err := driverInit(conf)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	entry := ejrnl.Entry{
+		Date: time.Now(),
+		Body: "Hello",
+		Id:   "1111111111111111111",
+		Tags: []string{"test"},
+	}
+	err = d.Write(entry)
+	if err != nil {
+		t.Errorf("Failed to write entry because %s", err)
+		return
+	}
+	read, err := d.Read(entry.Id)
+	if err != nil {
+		t.Errorf("Failed to read entry because %s", err)
+		return
+	}
+
+	if !compareEntries(entry, read) {
+		t.Errorf("Entries aren't equal \n%v\n%v", entry, read)
 	}
 }

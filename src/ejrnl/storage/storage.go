@@ -4,9 +4,11 @@ import (
 	"encoding/base64"
 	"encoding/json"
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/user"
 	"strings"
+	"sync"
 	"time"
 
 	"ejrnl"
@@ -16,6 +18,7 @@ import (
 type Driver struct {
 	directory string
 	key       []byte
+	indexLock *sync.RWMutex
 }
 
 // NewDriver creates a new storage driver from the specified config and password.
@@ -33,6 +36,7 @@ func NewDriver(conf ejrnl.Config, password string) (*Driver, error) {
 	driver := &Driver{
 		directory: conf.StorageDirectory,
 		key:       key,
+		indexLock: &sync.RWMutex{},
 	}
 
 	err = driver.checkExists()
@@ -60,6 +64,83 @@ func (d *Driver) checkExists() error {
 	return nil
 }
 
+func (d *Driver) Write(entry ejrnl.Entry) error {
+	plaintext, err := json.Marshal(entry)
+	if err != nil {
+		return err
+	}
+	cyphertext, err := crypto.Encrypt(plaintext, d.key)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.cpt", d.directory, entry.Id), cyphertext, 0600)
+	if err != nil {
+		return err
+	}
+
+	d.indexLock.Lock()
+	index, err := d.readIndex()
+	if err != nil {
+		d.indexLock.Unlock()
+		return err
+	}
+	index[entry.Date] = entry.Id
+	err = d.writeIndex(index)
+	d.indexLock.Unlock()
+	return err
+}
+
+func (d *Driver) Read(id string) (ejrnl.Entry, error) {
+	bytes, err := ioutil.ReadFile(fmt.Sprintf("%s/%s.cpt", d.directory, id))
+	if err != nil {
+		return ejrnl.Entry{}, err
+	}
+
+	plaintext, err := crypto.Decrypt(bytes, d.key)
+	if err != nil {
+		return ejrnl.Entry{}, err
+	}
+
+	entry := &ejrnl.Entry{}
+	err = json.Unmarshal(plaintext, entry)
+	return *entry, err
+}
+
+// readIndex reads the index from the disk. The caller must have at least a read lock on d.indexLock
+func (d *Driver) readIndex() (map[time.Time]string, error) {
+	index := make(map[time.Time]string)
+	cyphertext, err := ioutil.ReadFile(fmt.Sprintf("%s/index.cpt", d.directory))
+	if err != nil {
+		return index, err
+	}
+
+	plaintext, err := crypto.Decrypt(cyphertext, d.key)
+	if err != nil {
+		return index, err
+	}
+
+	p := &index
+	err = json.Unmarshal(plaintext, p)
+	return *p, err
+}
+
+// writeIndex writes an updated index file. Note that the caller must have the a lock on d.indexLock
+func (d *Driver) writeIndex(index map[time.Time]string) error {
+	plaintext, err := json.Marshal(index)
+	if err != nil {
+		return err
+	}
+
+	cyphertext, err := crypto.Encrypt(plaintext, d.key)
+	if err != nil {
+		return err
+	}
+
+	err = ioutil.WriteFile(fmt.Sprintf("%s/index.cpt", d.directory), cyphertext, 0600)
+	return err
+}
+
 // Init creates the new journal
 func (d *Driver) Init() error {
 	if _, err := os.Stat(d.directory); os.IsNotExist(err) {
@@ -67,26 +148,5 @@ func (d *Driver) Init() error {
 	}
 
 	emptyIndex := make(map[time.Time]string)
-	data, err := json.Marshal(emptyIndex)
-	if err != nil {
-		return fmt.Errorf("Failed to encode the empty index to json because %s", err)
-	}
-
-	encrypted, err := crypto.Encrypt(data, d.key)
-	if err != nil {
-		return fmt.Errorf("Failed to encrypt the empty index because %s", err)
-	}
-
-	file, err := os.Create(fmt.Sprintf("%s/index.ejrnl", d.directory))
-	if err != nil {
-		return fmt.Errorf("Failed to create the index file because %s", err)
-	}
-	defer file.Close()
-
-	_, err = file.Write(encrypted)
-	if err != nil {
-		return fmt.Errorf("Failed to write the fresh index file because %s", err)
-	}
-
-	return nil
+	return d.writeIndex(emptyIndex)
 }
