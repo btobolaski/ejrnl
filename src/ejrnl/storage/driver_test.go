@@ -113,3 +113,97 @@ func TestDriverRoundtrip(t *testing.T) {
 		t.Errorf("Entries aren't equal \n%v\n%v", entry, read)
 	}
 }
+
+func TestRewriteDate(t *testing.T) {
+	conf := ejrnl.Config{
+		StorageDirectory: "../../../overwrite-test",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	d, err := driverInit(conf)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	entry := ejrnl.Entry{
+		Date: time.Now(),
+		Body: "Hello",
+		Id:   "1111111111111111111",
+		Tags: []string{"test"},
+	}
+	err = d.Write(entry)
+	if err != nil {
+		t.Errorf("Failed to write entry because %s", err)
+		return
+	}
+	entry.Date = time.Now()
+	err = d.Write(entry)
+	if err != nil {
+		t.Errorf("failed to overwrite entry because %s", err)
+		return
+	}
+
+	index, err := d.readIndex()
+	if err != nil {
+		t.Errorf("Failed to read index because %s", err)
+		return
+	}
+
+	if len(index) > 1 {
+		t.Errorf("Multiple index entries for a single entry")
+	}
+}
+
+func TestIndexRecovery(t *testing.T) {
+	conf := ejrnl.Config{
+		StorageDirectory: "../../../recovery-test",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	d, err := driverInit(conf)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	entry := ejrnl.Entry{
+		Date: time.Now(),
+		Body: "Hello",
+		Id:   "1111111111111111111",
+		Tags: []string{"test"},
+	}
+	err = d.Write(entry)
+	if err != nil {
+		t.Errorf("Failed to write entry because %s", err)
+		return
+	}
+
+	os.RemoveAll(fmt.Sprintf("%s/index.cpt", conf.StorageDirectory))
+	d, err = driverInit(conf)
+	if err != nil {
+		t.Errorf("Failed to reinit driver because %s", err)
+		return
+	}
+	index, err := d.readIndex()
+	if err != nil {
+		t.Errorf("Failed to read index because %s", err)
+		return
+	}
+	if index[entry.Date] == "" {
+		t.Errorf("index did not contain previously written entry")
+		return
+	}
+	read, err := d.Read(index[entry.Date])
+	if err != nil {
+		t.Errorf("Failed to read recovered entry because %s", err)
+		return
+	}
+	if !compareEntries(entry, read) {
+		t.Errorf("Written entry is different from recovered entry:\n%v\n%v", entry, read)
+	}
+}

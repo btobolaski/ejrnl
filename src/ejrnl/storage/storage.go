@@ -3,10 +3,13 @@ package storage
 import (
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
 	"os/user"
+	"regexp"
 	"strings"
 	"sync"
 	"time"
@@ -74,20 +77,31 @@ func (d *Driver) Write(entry ejrnl.Entry) error {
 		return err
 	}
 
+	var previousDate time.Time
+
+	if _, err = os.Stat(fmt.Sprintf("%s/%s.cpt", d.directory, entry.Id)); err == nil {
+		old, err := d.Read(entry.Id)
+		if err != nil {
+			log.Printf("Failed to read previous entry because %s", err)
+		} else {
+			previousDate = old.Date
+		}
+	}
+
 	err = ioutil.WriteFile(fmt.Sprintf("%s/%s.cpt", d.directory, entry.Id), cyphertext, 0600)
 	if err != nil {
 		return err
 	}
 
 	d.indexLock.Lock()
+	defer d.indexLock.Unlock()
 	index, err := d.readIndex()
 	if err != nil {
-		d.indexLock.Unlock()
 		return err
 	}
+	delete(index, previousDate)
 	index[entry.Date] = entry.Id
 	err = d.writeIndex(index)
-	d.indexLock.Unlock()
 	return err
 }
 
@@ -143,10 +157,62 @@ func (d *Driver) writeIndex(index map[time.Time]string) error {
 
 // Init creates the new journal
 func (d *Driver) Init() error {
+	d.indexLock.Lock()
+	defer d.indexLock.Unlock()
 	if _, err := os.Stat(d.directory); os.IsNotExist(err) {
 		os.MkdirAll(d.directory, 0700)
 	}
 
+	files, err := ioutil.ReadDir(d.directory)
+	if err != nil {
+		return fmt.Errorf("Failed to read directory for journal because %s")
+	}
+	previousEntries := []os.FileInfo{}
+	for _, file := range files {
+		if match, _ := regexp.MatchString("\\.cpt$", file.Name()); match {
+			previousEntries = append(previousEntries, file)
+		}
+	}
+
 	emptyIndex := make(map[time.Time]string)
+
+	if len(previousEntries) > 0 {
+		entryReader := make(chan *ejrnl.Entry, len(previousEntries))
+		reader := func(f os.FileInfo) {
+			id := strings.Replace(f.Name(), ".cpt", "", 1)
+			entry, err := d.Read(id)
+			if err != nil {
+				log.Printf("Failed to recover %s because %s", f.Name(), err)
+				entryReader <- nil
+			} else {
+				entryReader <- &entry
+			}
+		}
+		for _, file := range previousEntries {
+			go reader(file)
+		}
+
+		complete := 0
+		failed := 0
+		timer := time.NewTimer(30 * time.Second)
+
+		for complete < len(previousEntries) {
+			select {
+			case entry := <-entryReader:
+				complete++
+				if entry == nil {
+					failed++
+				} else {
+					emptyIndex[entry.Date] = entry.Id
+				}
+			case <-timer.C:
+				return errors.New("Timed out waiting for recovery to finish")
+			}
+		}
+		if failed > 0 {
+			return errors.New("Failed to recover one or more entries. See previous messages")
+		}
+	}
+
 	return d.writeIndex(emptyIndex)
 }
