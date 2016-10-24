@@ -24,7 +24,7 @@ func TestDriverNeedsInit(t *testing.T) {
 	conf := ejrnl.Config{
 		StorageDirectory: "../../../needs-init",
 		Salt:             makeSalt(32),
-		Pow:              15,
+		Pow:              12,
 	}
 
 	_, err := NewDriver(conf, "password")
@@ -47,7 +47,7 @@ func TestDriverInit(t *testing.T) {
 	conf := ejrnl.Config{
 		StorageDirectory: "../../../init-test",
 		Salt:             makeSalt(32),
-		Pow:              15,
+		Pow:              12,
 	}
 
 	_, err := driverInit(conf)
@@ -82,7 +82,7 @@ func TestDriverRoundtrip(t *testing.T) {
 	conf := ejrnl.Config{
 		StorageDirectory: "../../../roundtrip-test",
 		Salt:             makeSalt(32),
-		Pow:              15,
+		Pow:              12,
 	}
 
 	d, err := driverInit(conf)
