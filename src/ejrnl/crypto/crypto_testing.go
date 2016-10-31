@@ -17,6 +17,7 @@ func dataEqual(first, second []byte) bool {
 }
 
 func TestCryptoRoundtrip(t *testing.T) {
+	t.Parallel()
 	expected := []byte("data")
 	input := []byte("data")
 	password, err := GenerateKey([]byte("password"), []byte("salt"), 15)

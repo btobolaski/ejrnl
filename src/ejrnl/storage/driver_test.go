@@ -21,6 +21,7 @@ func makeSalt(b int) string {
 }
 
 func TestDriverNeedsInit(t *testing.T) {
+	t.Parallel()
 	conf := ejrnl.Config{
 		StorageDirectory: "../../../needs-init",
 		Salt:             makeSalt(32),
@@ -44,6 +45,7 @@ func driverInit(conf ejrnl.Config) (*Driver, error) {
 }
 
 func TestDriverInit(t *testing.T) {
+	t.Parallel()
 	conf := ejrnl.Config{
 		StorageDirectory: "../../../init-test",
 		Salt:             makeSalt(32),
@@ -79,6 +81,7 @@ func compareEntries(first, second ejrnl.Entry) bool {
 }
 
 func TestDriverRoundtrip(t *testing.T) {
+	t.Parallel()
 	conf := ejrnl.Config{
 		StorageDirectory: "../../../roundtrip-test",
 		Salt:             makeSalt(32),
@@ -115,6 +118,7 @@ func TestDriverRoundtrip(t *testing.T) {
 }
 
 func TestRewriteDate(t *testing.T) {
+	t.Parallel()
 	conf := ejrnl.Config{
 		StorageDirectory: "../../../overwrite-test",
 		Salt:             makeSalt(32),
@@ -158,6 +162,7 @@ func TestRewriteDate(t *testing.T) {
 }
 
 func TestIndexRecovery(t *testing.T) {
+	t.Parallel()
 	conf := ejrnl.Config{
 		StorageDirectory: "../../../recovery-test",
 		Salt:             makeSalt(32),
