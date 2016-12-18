@@ -1,0 +1,5 @@
+package: code.tobolaski.com/brendan/ejrnl
+import:
+- package: golang.org/x/crypto
+  subpackages:
+  - scrypt

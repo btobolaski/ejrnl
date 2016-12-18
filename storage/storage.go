@@ -14,8 +14,8 @@ import (
 	"sync"
 	"time"
 
-	"ejrnl"
-	"ejrnl/crypto"
+	"code.tobolaski.com/brendan/ejrnl"
+	"code.tobolaski.com/brendan/ejrnl/crypto"
 )
 
 type Driver struct {
