@@ -105,3 +105,52 @@ func TestDefaultConfig(t *testing.T) {
 		t.Error("Salt was of the wrong length")
 	}
 }
+
+func TestListing(t *testing.T) {
+	conf := ejrnl.Config{
+		StorageDirectory: "../workflow-listing",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	driver, err := storage.NewDriver(conf, "password")
+	if _, ok := err.(*storage.NeedsInit); !ok {
+		t.Errorf("Expected driver to need init but got err instead: %s", err)
+		return
+	}
+
+	err = Init(driver)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Errorf("Failed to init the driver because %s", err)
+		return
+	}
+
+	date := time.Date(2015, 12, 24, 0, 32, 58, 0, time.UTC)
+	err = driver.Write(ejrnl.Entry{
+		Id:   "1",
+		Date: &date,
+	})
+	if err != nil {
+		t.Errorf("Failed to write entry because %s", err)
+		return
+	}
+	date = time.Date(2016, 12, 24, 0, 32, 58, 0, time.UTC)
+	err = driver.Write(ejrnl.Entry{
+		Id:   "2",
+		Date: &date,
+	})
+	if err != nil {
+		t.Errorf("Failed to write entry because %s", err)
+		return
+	}
+
+	listing, sorted, err := listing(driver)
+	if err != nil {
+		t.Errorf("Failed to get listing because %s", err)
+		return
+	}
+	if listing[sorted[0]] != "2" {
+		t.Errorf("Sorting was incorrect %v", sorted)
+	}
+}

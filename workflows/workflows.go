@@ -7,8 +7,8 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-
-	_ "time"
+	"sort"
+	"time"
 
 	"gopkg.in/yaml.v2"
 
@@ -49,6 +49,59 @@ func DefaultConfig() ejrnl.Config {
 		Salt:             makeSalt(64),
 		Pow:              19,
 	}
+}
+
+func Print(driver ejrnl.Driver, count int) error {
+	listing, sorted, err := listing(driver)
+	if err != nil {
+		return err
+	}
+	if count <= 0 {
+		count = len(sorted)
+	} else if count > len(sorted) {
+		count = len(sorted)
+	}
+
+	for i := 0; i < count; i++ {
+		entry, err := driver.Read(listing[sorted[i]])
+		if err != nil {
+			return err
+		}
+		fmt.Printf("%s\n\n-------------------------------------\n\n", format(entry))
+	}
+	return nil
+}
+
+type timeSlice []time.Time
+
+func (ts timeSlice) Len() int {
+	return len(ts)
+}
+
+func (ts timeSlice) Less(i, j int) bool {
+	return ts[i].Before(ts[j])
+}
+
+func (ts timeSlice) Swap(i, j int) {
+	temp := ts[i]
+	ts[i] = ts[j]
+	ts[j] = temp
+}
+
+// listing gets a listing of all of the entries and sorts the listing's index by reverse
+// chronological order
+func listing(driver ejrnl.Driver) (map[time.Time]string, []time.Time, error) {
+	listing, err := driver.List()
+	if err != nil {
+		return listing, []time.Time{}, nil
+	}
+	keys := []time.Time{}
+	for i := range listing {
+		keys = append(keys, i)
+	}
+	ts := timeSlice(keys)
+	sort.Sort(sort.Reverse(ts))
+	return listing, []time.Time(ts), nil
 }
 
 // read reads the expected format and returns the parsed value.
