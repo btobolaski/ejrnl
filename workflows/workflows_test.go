@@ -1,8 +1,12 @@
 package workflows
 
 import (
+	"os"
 	"testing"
 	"time"
+
+	"code.tobolaski.com/brendan/ejrnl"
+	"code.tobolaski.com/brendan/ejrnl/storage"
 )
 
 var exampleEntry = `date: 2016-12-24T00:32:58Z
@@ -39,5 +43,65 @@ func TestRoundTrip(t *testing.T) {
 	display := format(entry)
 	if display != exampleEntry {
 		t.Errorf("Formatted entry doesn't match expected.\ngot:      '%s'\nexpected: '%s'", display, exampleEntry)
+	}
+}
+
+func TestInit(t *testing.T) {
+	conf := ejrnl.Config{
+		StorageDirectory: "../workflow-init",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	driver, err := storage.NewDriver(conf, "password")
+	if _, ok := err.(*storage.NeedsInit); !ok {
+		t.Errorf("Expected driver to need init but got err instead: %s", err)
+		return
+	}
+
+	err = Init(driver)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Errorf("Failed to init the driver because %s", err)
+	}
+}
+
+func TestImport(t *testing.T) {
+	conf := ejrnl.Config{
+		StorageDirectory: "../workflow-import",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	driver, err := storage.NewDriver(conf, "password")
+	if _, ok := err.(*storage.NeedsInit); !ok {
+		t.Errorf("Expected driver to need init but got err instead: %s", err)
+		return
+	}
+
+	err = Init(driver)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Errorf("Failed to init the driver because %s", err)
+		return
+	}
+
+	err = Import("./import_test.md", driver)
+	if err != nil {
+		t.Errorf("Failed to import file because %s", err)
+	}
+}
+
+func TestDefaultConfig(t *testing.T) {
+	conf := DefaultConfig()
+	if conf.StorageDirectory != "~/ejrnl" {
+		t.Errorf("Storage directory %s is not the default", conf.StorageDirectory)
+	}
+	if conf.Pow != 19 {
+		t.Errorf("Incorrect default workfactor %d", conf.Pow)
+	}
+
+	if len(conf.Salt) < 64 {
+		t.Error("Salt was of the wrong length")
 	}
 }
