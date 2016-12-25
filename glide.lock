@@ -1,6 +1,8 @@
-hash: a0eb7069b05879343091ca7900e42563d86ab322cdca1ca18240a5379ff27d4e
-updated: 2016-12-23T19:50:12.067626983-06:00
+hash: 9565169ecd5f0cb27f582e83f63a4d38c6311bb485d5793f1ea023d87be23524
+updated: 2016-12-25T10:30:12.950411137-06:00
 imports:
+- name: github.com/satori/go.uuid
+  version: b061729afc07e77a8aa4fad0a2fd840958f1942a
 - name: golang.org/x/crypto
   version: 9b1a210a06ea1176ec1f0a1ddf83ad7463b8ea3e
   subpackages:

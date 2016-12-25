@@ -14,6 +14,8 @@ import (
 	"sync"
 	"time"
 
+	"github.com/satori/go.uuid"
+
 	"code.tobolaski.com/brendan/ejrnl"
 	"code.tobolaski.com/brendan/ejrnl/crypto"
 )
@@ -71,6 +73,9 @@ func (d *Driver) Write(entry ejrnl.Entry) error {
 	if entry.Date == nil {
 		now := time.Now()
 		entry.Date = &now
+	}
+	if entry.Id == "" {
+		entry.Id = fmt.Sprintf("%s", uuid.NewV4())
 	}
 	plaintext, err := json.Marshal(entry)
 	if err != nil {

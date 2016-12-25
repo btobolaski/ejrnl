@@ -253,6 +253,48 @@ func TestDefaultDate(t *testing.T) {
 	}
 }
 
+func TestDefaultId(t *testing.T) {
+	t.Parallel()
+	conf := ejrnl.Config{
+		StorageDirectory: "../default-id",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	d, err := driverInit(conf)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	date := time.Now()
+	entry := ejrnl.Entry{
+		Body: "Hello",
+		Date: &date,
+		Tags: []string{"test"},
+	}
+	err = d.Write(entry)
+	if err != nil {
+		t.Errorf("Failed to write entry because %s", err)
+		return
+	}
+	listing, err := d.List()
+	if err != nil {
+		t.Errorf("Failed to get a listing because %s", err)
+		return
+	}
+	read, err := d.Read(listing[date])
+	if err != nil {
+		t.Errorf("Failed to read entry because %s", err)
+		return
+	}
+
+	if read.Id == "" {
+		t.Error("ID wasn't set automatically")
+	}
+}
+
 func TestTildeExpand(t *testing.T) {
 	conf := ejrnl.Config{
 		StorageDirectory: "~/tilde-expand",
