@@ -125,6 +125,13 @@ func (d *Driver) Read(id string) (ejrnl.Entry, error) {
 	return *entry, err
 }
 
+// List returns the index of all the entries stored in the journal
+func (d *Driver) List() (map[time.Time]string, error) {
+	d.indexLock.RLock()
+	defer d.indexLock.RUnlock()
+	return d.readIndex()
+}
+
 // readIndex reads the index from the disk. The caller must have at least a read lock on d.indexLock
 func (d *Driver) readIndex() (map[time.Time]string, error) {
 	index := make(map[time.Time]string)

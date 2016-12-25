@@ -19,5 +19,6 @@ type Entry struct {
 type Driver interface {
 	Write(Entry) error
 	Read(string) (Entry, error)
+	List() (map[time.Time]string, error)
 	Init() error
 }
