@@ -1,9 +1,11 @@
-hash: 055cded991ac73bcb330b54385024b4ecf9cf94dcd88e516976b2ba326eea0ed
-updated: 2016-12-17T22:14:18.257280523-06:00
+hash: a0eb7069b05879343091ca7900e42563d86ab322cdca1ca18240a5379ff27d4e
+updated: 2016-12-23T19:50:12.067626983-06:00
 imports:
 - name: golang.org/x/crypto
   version: 9b1a210a06ea1176ec1f0a1ddf83ad7463b8ea3e
   subpackages:
   - pbkdf2
   - scrypt
+- name: gopkg.in/yaml.v2
+  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports: []

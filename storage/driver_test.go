@@ -60,7 +60,7 @@ func TestDriverInit(t *testing.T) {
 }
 
 func compareEntries(first, second ejrnl.Entry) bool {
-	if first.Date != second.Date {
+	if *first.Date != *second.Date {
 		return false
 	}
 	if first.Body != second.Body {
@@ -95,8 +95,9 @@ func TestDriverRoundtrip(t *testing.T) {
 		return
 	}
 
+	now := time.Now()
 	entry := ejrnl.Entry{
-		Date: time.Now(),
+		Date: &now,
 		Body: "Hello",
 		Id:   "1111111111111111111",
 		Tags: []string{"test"},
@@ -132,8 +133,9 @@ func TestRewriteDate(t *testing.T) {
 		return
 	}
 
+	now := time.Now()
 	entry := ejrnl.Entry{
-		Date: time.Now(),
+		Date: &now,
 		Body: "Hello",
 		Id:   "1111111111111111111",
 		Tags: []string{"test"},
@@ -143,7 +145,8 @@ func TestRewriteDate(t *testing.T) {
 		t.Errorf("Failed to write entry because %s", err)
 		return
 	}
-	entry.Date = time.Now()
+	now = time.Now()
+	entry.Date = &now
 	err = d.Write(entry)
 	if err != nil {
 		t.Errorf("failed to overwrite entry because %s", err)
@@ -176,8 +179,9 @@ func TestIndexRecovery(t *testing.T) {
 		return
 	}
 
+	now := time.Now()
 	entry := ejrnl.Entry{
-		Date: time.Now(),
+		Date: &now,
 		Body: "Hello",
 		Id:   "1111111111111111111",
 		Tags: []string{"test"},
@@ -199,11 +203,11 @@ func TestIndexRecovery(t *testing.T) {
 		t.Errorf("Failed to read index because %s", err)
 		return
 	}
-	if index[entry.Date] == "" {
+	if index[*entry.Date] == "" {
 		t.Errorf("index did not contain previously written entry")
 		return
 	}
-	read, err := d.Read(index[entry.Date])
+	read, err := d.Read(index[*entry.Date])
 	if err != nil {
 		t.Errorf("Failed to read recovered entry because %s", err)
 		return

@@ -84,7 +84,7 @@ func (d *Driver) Write(entry ejrnl.Entry) error {
 		if err != nil {
 			log.Printf("Failed to read previous entry because %s", err)
 		} else {
-			previousDate = old.Date
+			previousDate = *old.Date
 		}
 	}
 
@@ -100,7 +100,7 @@ func (d *Driver) Write(entry ejrnl.Entry) error {
 		return err
 	}
 	delete(index, previousDate)
-	index[entry.Date] = entry.Id
+	index[*entry.Date] = entry.Id
 	err = d.writeIndex(index)
 	return err
 }
@@ -203,7 +203,7 @@ func (d *Driver) Init() error {
 				if entry == nil {
 					failed++
 				} else {
-					emptyIndex[entry.Date] = entry.Id
+					emptyIndex[*entry.Date] = entry.Id
 				}
 			case <-timer.C:
 				return errors.New("Timed out waiting for recovery to finish")
