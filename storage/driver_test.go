@@ -252,3 +252,16 @@ func TestDefaultDate(t *testing.T) {
 		t.Error("Date wasn't set automatically for file")
 	}
 }
+
+func TestTildeExpand(t *testing.T) {
+	conf := ejrnl.Config{
+		StorageDirectory: "~/tilde-expand",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	driver, _ := NewDriver(conf, "password")
+	if driver.directory[:1] == "~" {
+		t.Error("Didn't expand ~ in the storage path")
+	}
+}
