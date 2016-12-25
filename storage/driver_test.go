@@ -216,3 +216,39 @@ func TestIndexRecovery(t *testing.T) {
 		t.Errorf("Written entry is different from recovered entry:\n%v\n%v", entry, read)
 	}
 }
+
+func TestDefaultDate(t *testing.T) {
+	t.Parallel()
+	conf := ejrnl.Config{
+		StorageDirectory: "../default-date",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	d, err := driverInit(conf)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	entry := ejrnl.Entry{
+		Body: "Hello",
+		Id:   "1111111111111111111",
+		Tags: []string{"test"},
+	}
+	err = d.Write(entry)
+	if err != nil {
+		t.Errorf("Failed to write entry because %s", err)
+		return
+	}
+	read, err := d.Read(entry.Id)
+	if err != nil {
+		t.Errorf("Failed to read entry because %s", err)
+		return
+	}
+
+	if read.Date == nil {
+		t.Error("Date wasn't set automatically for file")
+	}
+}

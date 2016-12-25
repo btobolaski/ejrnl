@@ -68,6 +68,10 @@ func (d *Driver) checkExists() error {
 }
 
 func (d *Driver) Write(entry ejrnl.Entry) error {
+	if entry.Date == nil {
+		now := time.Now()
+		entry.Date = &now
+	}
 	plaintext, err := json.Marshal(entry)
 	if err != nil {
 		return err
