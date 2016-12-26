@@ -159,6 +159,20 @@ func main() {
 				return workflows.NewEntry(driver)
 			},
 		},
+		{
+			Name:  "edit",
+			Usage: "edits an existing journal entry. Takes an id as an argument.",
+			Action: func(c *cli.Context) error {
+				if len(c.Args()) != 1 {
+					return errors.New("edit takes 1 argument which is an entry's id")
+				}
+				driver, err := standardLoad(configPath)
+				if err != nil {
+					return err
+				}
+				return workflows.EditEntry(driver, c.Args()[0])
+			},
+		},
 	}
 	err := app.Run(os.Args)
 	if err != nil {

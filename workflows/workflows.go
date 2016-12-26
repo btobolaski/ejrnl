@@ -93,6 +93,8 @@ func ListEntries(driver ejrnl.Driver, count int) error {
 	return nil
 }
 
+// NewEntry creates a new entry in the expected format and then opens the user's editor for them to
+// edit the entry.
 func NewEntry(driver ejrnl.Driver) error {
 	date := time.Now()
 	entry := ejrnl.Entry{Date: &date}
@@ -122,6 +124,45 @@ func NewEntry(driver ejrnl.Driver) error {
 		return err
 	}
 	return os.Remove(tempFile)
+}
+
+// EditEntry decrypts the specified entry and then opens the user's editor and saves the edits
+func EditEntry(driver ejrnl.Driver, id string) error {
+	entry, err := driver.Read(id)
+	if err != nil {
+		return err
+	}
+
+	tempFile := strings.Replace(fmt.Sprintf("%s/%s.ejrnl", os.TempDir(), entry.Id), " ", "-", -1)
+	err = ioutil.WriteFile(tempFile, []byte(format(entry)), 0600)
+	if err != nil {
+		return err
+	}
+	err = editFile(tempFile)
+	if err != nil {
+		fmt.Printf("an error was encountered, the editted file still exists at %s\n", tempFile)
+		return err
+	}
+	bytes, err := ioutil.ReadFile(tempFile)
+	if err != nil {
+		fmt.Printf("an error was encountered, the editted file still exists at %s\n", tempFile)
+		return err
+	}
+	entry, err = read(bytes)
+	if err != nil {
+		fmt.Printf("an error was encountered, the editted file still exists at %s\n", tempFile)
+		return err
+	}
+	err = driver.Write(entry)
+	if err != nil {
+		fmt.Printf("an error was encountered, the editted file still exists at %s\n", tempFile)
+		return err
+	}
+	err = os.Remove(tempFile)
+	if err != nil {
+		fmt.Printf("an error was encountered, the editted file still exists at %s\n", tempFile)
+	}
+	return err
 }
 
 type timeSlice []time.Time
