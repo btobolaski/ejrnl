@@ -66,7 +66,12 @@ func (d *Driver) checkExists() error {
 		return &NeedsInit{msg: "the index doesn't exist"}
 	}
 
-	return nil
+	d.indexLock.RLock()
+	defer d.indexLock.RUnlock()
+
+	_, err = d.readIndex()
+
+	return err
 }
 
 func (d *Driver) Write(entry ejrnl.Entry) error {
