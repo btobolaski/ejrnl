@@ -10,4 +10,4 @@ specifically) with AES-128 as the cipher. The key is generated using scrypt from
 password and a salt that is generated on your first use of ejrnl. The exact storage format for the
 encrypted files is as follows:
 
-`{{nonce}}{{null}}{{null}}{{null}}{{file}}`
+`{{nonce}}{{file}}`

@@ -5,7 +5,6 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
-	"fmt"
 
 	"golang.org/x/crypto/scrypt"
 )
@@ -38,15 +37,11 @@ func Encrypt(data, key []byte) ([]byte, error) {
 	}
 
 	cyphertext := aead.Seal(data[:0], nounce, data, []byte{})
-	return append(append(nounce, []byte("\x00\x00\x00")...), cyphertext...), nil
+	return append(nounce, cyphertext...), nil
 }
 
 // decrypt decrypts the passed in data. The data is expected to be in the format {{nonce}}{{null}}{{null}}{{ciphertext}}
 func Decrypt(cyphertext, key []byte) ([]byte, error) {
-	parts := bytes.SplitN(cyphertext, []byte("\x00\x00\x00"), 2)
-	if len(parts) != 2 {
-		return []byte{}, fmt.Errorf("cyphertext isn't in the proper format")
-	}
 
 	block, err := aes.NewCipher(key)
 	if err != nil {
@@ -58,9 +53,11 @@ func Decrypt(cyphertext, key []byte) ([]byte, error) {
 		return []byte{}, err
 	}
 
-	dest := make([]byte, len(parts[1]))
-	nounce := parts[0]
-	plaintext, err := aead.Open(dest, nounce, parts[1], []byte{})
+	nounce := cyphertext[:aead.NonceSize()]
+	cyphertext = cyphertext[aead.NonceSize():]
+
+	dest := make([]byte, len(cyphertext))
+	plaintext, err := aead.Open(dest, nounce, cyphertext, []byte{})
 
 	// aead pads the input data with null values at the beginning. Applications won't care about this
 	// padding so, we just remove them
