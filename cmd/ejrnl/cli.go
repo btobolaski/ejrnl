@@ -102,15 +102,7 @@ func main() {
 				if len(c.Args()) != 1 {
 					return errors.New("import requires 1 argument which is the file to import")
 				}
-				config, err := readConfig(configPath)
-				if err != nil {
-					return err
-				}
-				password, err := getPassword()
-				if err != nil {
-					return err
-				}
-				driver, err := storage.NewDriver(config, password)
+				driver, err := standardLoad(configPath)
 				if err != nil {
 					return err
 				}
@@ -129,16 +121,7 @@ func main() {
 				},
 			},
 			Action: func(c *cli.Context) error {
-				config, err := readConfig(configPath)
-				if err != nil {
-					return err
-				}
-				password, err := getPassword()
-				if err != nil {
-					return err
-				}
-				driver, err := storage.NewDriver(config, password)
-				password = ""
+				driver, err := standardLoad(configPath)
 				if err != nil {
 					return err
 				}
@@ -157,16 +140,7 @@ func main() {
 				},
 			},
 			Action: func(c *cli.Context) error {
-				config, err := readConfig(configPath)
-				if err != nil {
-					return err
-				}
-				password, err := getPassword()
-				if err != nil {
-					return err
-				}
-				driver, err := storage.NewDriver(config, password)
-				password = ""
+				driver, err := standardLoad(configPath)
 				if err != nil {
 					return err
 				}
@@ -196,4 +170,16 @@ func readConfig(path string) (ejrnl.Config, error) {
 	entry := &ejrnl.Config{}
 	err = yaml.Unmarshal(data, entry)
 	return *entry, err
+}
+
+func standardLoad(configPath string) (*storage.Driver, error) {
+	config, err := readConfig(configPath)
+	if err != nil {
+		return &storage.Driver{}, err
+	}
+	password, err := getPassword()
+	if err != nil {
+		return &storage.Driver{}, err
+	}
+	return storage.NewDriver(config, password)
 }
