@@ -62,7 +62,7 @@ func (d *Driver) checkExists() error {
 	path := strings.Replace(d.directory, "~", current.HomeDir, -1)
 	d.directory = path
 
-	if _, err := os.Stat(fmt.Sprintf("%s/index.ejrnl", path)); os.IsNotExist(err) {
+	if _, err := os.Stat(fmt.Sprintf("%s/index.cpt", path)); os.IsNotExist(err) {
 		return &NeedsInit{msg: "the index doesn't exist"}
 	}
 
