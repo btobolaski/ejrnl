@@ -72,6 +72,24 @@ func Print(driver ejrnl.Driver, count int) error {
 	return nil
 }
 
+// ListEntries outputs the date and id of the most recent count of entries. If count <= 0, it
+// outputs all of the entries
+func ListEntries(driver ejrnl.Driver, count int) error {
+	index, sorted, err := listing(driver)
+	if err != nil {
+		return err
+	}
+
+	if count <= 0 || count > len(sorted) {
+		count = len(sorted)
+	}
+
+	for i := 0; i < count; i++ {
+		fmt.Printf("%s - %s\n", sorted[i], index[sorted[i]])
+	}
+	return nil
+}
+
 type timeSlice []time.Time
 
 func (ts timeSlice) Len() int {

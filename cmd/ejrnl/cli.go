@@ -138,11 +138,40 @@ func main() {
 					return err
 				}
 				driver, err := storage.NewDriver(config, password)
+				password = ""
 				if err != nil {
 					return err
 				}
 
 				return workflows.Print(driver, c.Int("count"))
+			},
+		},
+		{
+			Name:  "list",
+			Usage: "Lists the ids and dates of the most recent entries",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "count",
+					Value: 0,
+					Usage: "The number of results to return. If it is <= 0, it returns all of the entries",
+				},
+			},
+			Action: func(c *cli.Context) error {
+				config, err := readConfig(configPath)
+				if err != nil {
+					return err
+				}
+				password, err := getPassword()
+				if err != nil {
+					return err
+				}
+				driver, err := storage.NewDriver(config, password)
+				password = ""
+				if err != nil {
+					return err
+				}
+
+				return workflows.ListEntries(driver, c.Int("count"))
 			},
 		},
 	}
