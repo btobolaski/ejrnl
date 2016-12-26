@@ -14,6 +14,7 @@ import (
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 
+	"code.tobolaski.com/brendan/ejrnl"
 	"code.tobolaski.com/brendan/ejrnl/storage"
 	"code.tobolaski.com/brendan/ejrnl/workflows"
 )
@@ -94,6 +95,56 @@ func main() {
 				return workflows.Init(driver)
 			},
 		},
+		{
+			Name:  "import",
+			Usage: "Adds the specified file into the journal",
+			Action: func(c *cli.Context) error {
+				if len(c.Args()) != 1 {
+					return errors.New("import requires 1 argument which is the file to import")
+				}
+				config, err := readConfig(configPath)
+				if err != nil {
+					return err
+				}
+				password, err := getPassword()
+				if err != nil {
+					return err
+				}
+				driver, err := storage.NewDriver(config, password)
+				if err != nil {
+					return err
+				}
+
+				return workflows.Import(c.Args()[0], driver)
+			},
+		},
+		{
+			Name:  "print",
+			Usage: "Prints out the most recent entries",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "count",
+					Usage: "The number of entries to output. If it is 0 or less, all entries are output",
+					Value: 0,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				config, err := readConfig(configPath)
+				if err != nil {
+					return err
+				}
+				password, err := getPassword()
+				if err != nil {
+					return err
+				}
+				driver, err := storage.NewDriver(config, password)
+				if err != nil {
+					return err
+				}
+
+				return workflows.Print(driver, c.Int("count"))
+			},
+		},
 	}
 	err := app.Run(os.Args)
 	if err != nil {
@@ -106,4 +157,14 @@ func getPassword() (string, error) {
 	fmt.Printf("Password: ")
 	raw, err := gopass.GetPasswd()
 	return string(raw), err
+}
+
+func readConfig(path string) (ejrnl.Config, error) {
+	data, err := ioutil.ReadFile(path)
+	if err != nil {
+		return ejrnl.Config{}, err
+	}
+	entry := &ejrnl.Config{}
+	err = yaml.Unmarshal(data, entry)
+	return *entry, err
 }
