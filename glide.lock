@@ -1,13 +1,22 @@
-hash: 9565169ecd5f0cb27f582e83f63a4d38c6311bb485d5793f1ea023d87be23524
-updated: 2016-12-25T10:30:12.950411137-06:00
+hash: 4d65fd74d96b75e517a71c25e6c0e8c1a6246be6d43cb1b13691c4c77d7ed746
+updated: 2016-12-25T22:59:43.209859856-06:00
 imports:
+- name: github.com/howeyc/gopass
+  version: f5387c492211eb133053880d23dfae62aa14123d
 - name: github.com/satori/go.uuid
   version: b061729afc07e77a8aa4fad0a2fd840958f1942a
+- name: github.com/urfave/cli
+  version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: golang.org/x/crypto
   version: 9b1a210a06ea1176ec1f0a1ddf83ad7463b8ea3e
   subpackages:
   - pbkdf2
   - scrypt
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: b699b7032584f0953262cb2788a0ca19bb494703
+  subpackages:
+  - unix
 - name: gopkg.in/yaml.v2
   version: a5b47d31c556af34a302ce5d659e6fea44d90de0
 testImports: []
