@@ -59,6 +59,27 @@ func TestDriverInit(t *testing.T) {
 	}
 }
 
+func TestIncorrectPassword(t *testing.T) {
+	t.Parallel()
+	conf := ejrnl.Config{
+		StorageDirectory: "../incorrect-password",
+		Salt:             makeSalt(32),
+		Pow:              12,
+	}
+
+	_, err := driverInit(conf)
+	defer os.RemoveAll(conf.StorageDirectory)
+	if err != nil {
+		t.Error(err)
+		return
+	}
+
+	_, err = NewDriver(conf, "incorrect-password")
+	if err == nil {
+		t.Error("An incorrect password didn't cause the driver to error")
+	}
+}
+
 func compareEntries(first, second ejrnl.Entry) bool {
 	if *first.Date != *second.Date {
 		return false
