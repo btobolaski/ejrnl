@@ -148,6 +148,17 @@ func main() {
 				return workflows.ListEntries(driver, c.Int("count"))
 			},
 		},
+		{
+			Name:  "new",
+			Usage: "Creates a new entry",
+			Action: func(c *cli.Context) error {
+				driver, err := standardLoad(configPath)
+				if err != nil {
+					return err
+				}
+				return workflows.NewEntry(driver)
+			},
+		},
 	}
 	err := app.Run(os.Args)
 	if err != nil {

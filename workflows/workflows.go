@@ -7,7 +7,10 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"os"
+	"os/exec"
 	"sort"
+	"strings"
 	"time"
 
 	"gopkg.in/yaml.v2"
@@ -90,6 +93,37 @@ func ListEntries(driver ejrnl.Driver, count int) error {
 	return nil
 }
 
+func NewEntry(driver ejrnl.Driver) error {
+	date := time.Now()
+	entry := ejrnl.Entry{Date: &date}
+	tempFile := strings.Replace(fmt.Sprintf("%s/%s.ejrnl", os.TempDir(), date), " ", "-", -1)
+	err := ioutil.WriteFile(tempFile, []byte(format(entry)), 0600)
+	if err != nil {
+		return err
+	}
+	err = editFile(tempFile)
+	if err != nil {
+		return err
+	}
+	bytes, err := ioutil.ReadFile(tempFile)
+	if err != nil {
+		return err
+	}
+	readEntry, err := read(bytes)
+	if err != nil {
+		return err
+	}
+	if readEntry.Body == entry.Body && len(readEntry.Tags) == 0 && readEntry.Id == "" {
+		println("entry wasn't changed, not adding it to the journal")
+		return os.Remove(tempFile)
+	}
+	err = driver.Write(readEntry)
+	if err != nil {
+		return err
+	}
+	return os.Remove(tempFile)
+}
+
 type timeSlice []time.Time
 
 func (ts timeSlice) Len() int {
@@ -151,4 +185,24 @@ func format(entry ejrnl.Entry) string {
 	}
 
 	return fmt.Sprintf("%s---\n%s", header, body)
+}
+
+func editFile(path string) error {
+	command := os.ExpandEnv("$EDITOR")
+	if command == "" {
+		if _, err := os.Stat("/usr/bin/edit"); err == nil {
+			command = "/usr/bin/edit"
+		} else if os.Stat("/usr/bin/editor"); err == nil {
+			command = "/usr/bin/editor"
+		} else if os.Stat("/usr/bin/vim"); err == nil {
+			command = "/usr/bin/vim"
+		} else if os.Stat("/usr/bin/vi"); err == nil {
+			command = "/usr/bin/vi"
+		}
+	}
+	cmd := exec.Command(command, path)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	return cmd.Run()
 }
