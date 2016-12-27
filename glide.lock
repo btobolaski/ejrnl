@@ -1,8 +1,10 @@
-hash: f965e4810ca355e4ee218d07cb6ed396c47faee3cebcb76768c5d57050487027
-updated: 2016-12-26T21:59:00.634160572-06:00
+hash: 6debc8e562b0fc522353d62e64855990f34674718e9b990891d3daece04c237c
+updated: 2016-12-26T22:54:00.909383029-06:00
 imports:
 - name: github.com/howeyc/gopass
   version: f5387c492211eb133053880d23dfae62aa14123d
+- name: github.com/Masterminds/glide
+  version: 84607742b10f492430762d038e954236bbaf23f7
 - name: github.com/satori/go.uuid
   version: b061729afc07e77a8aa4fad0a2fd840958f1942a
 - name: github.com/termie/go-shutil
