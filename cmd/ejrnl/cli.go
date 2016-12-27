@@ -21,6 +21,12 @@ import (
 
 var version = "0.0.1"
 
+var tempFlag = cli.StringFlag{
+	Name:  "temp-dir",
+	Usage: "Specifies the temporary directory to write the temporary files to.",
+	Value: os.TempDir(),
+}
+
 func main() {
 	app := cli.NewApp()
 
@@ -151,17 +157,19 @@ func main() {
 		{
 			Name:  "new",
 			Usage: "Creates a new entry",
+			Flags: []cli.Flag{tempFlag},
 			Action: func(c *cli.Context) error {
 				driver, err := standardLoad(configPath)
 				if err != nil {
 					return err
 				}
-				return workflows.NewEntry(driver)
+				return workflows.NewEntry(driver, c.String("temp-dir"))
 			},
 		},
 		{
 			Name:  "edit",
 			Usage: "edits an existing journal entry. Takes an id as an argument.",
+			Flags: []cli.Flag{tempFlag},
 			Action: func(c *cli.Context) error {
 				if len(c.Args()) != 1 {
 					return errors.New("edit takes 1 argument which is an entry's id")
@@ -170,7 +178,7 @@ func main() {
 				if err != nil {
 					return err
 				}
-				return workflows.EditEntry(driver, c.Args()[0])
+				return workflows.EditEntry(driver, c.Args()[0], c.String("temp-dir"))
 			},
 		},
 	}

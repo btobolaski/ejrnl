@@ -95,10 +95,10 @@ func ListEntries(driver ejrnl.Driver, count int) error {
 
 // NewEntry creates a new entry in the expected format and then opens the user's editor for them to
 // edit the entry.
-func NewEntry(driver ejrnl.Driver) error {
+func NewEntry(driver ejrnl.Driver, tempDir string) error {
 	date := time.Now()
 	entry := ejrnl.Entry{Date: &date}
-	tempFile := strings.Replace(fmt.Sprintf("%s/%s.ejrnl", os.TempDir(), date), " ", "-", -1)
+	tempFile := strings.Replace(fmt.Sprintf("%s/%s.ejrnl", tempDir, date), " ", "-", -1)
 	err := ioutil.WriteFile(tempFile, []byte(format(entry)), 0600)
 	if err != nil {
 		return err
@@ -127,13 +127,13 @@ func NewEntry(driver ejrnl.Driver) error {
 }
 
 // EditEntry decrypts the specified entry and then opens the user's editor and saves the edits
-func EditEntry(driver ejrnl.Driver, id string) error {
+func EditEntry(driver ejrnl.Driver, id, tempDir string) error {
 	entry, err := driver.Read(id)
 	if err != nil {
 		return err
 	}
 
-	tempFile := strings.Replace(fmt.Sprintf("%s/%s.ejrnl", os.TempDir(), entry.Id), " ", "-", -1)
+	tempFile := strings.Replace(fmt.Sprintf("%s/%s.ejrnl", tempDir, entry.Id), " ", "-", -1)
 	err = ioutil.WriteFile(tempFile, []byte(format(entry)), 0600)
 	if err != nil {
 		return err
