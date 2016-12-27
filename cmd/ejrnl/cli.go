@@ -189,6 +189,47 @@ func main() {
 				return workflows.EditEntry(driver, c.Args()[0], c.String("temp-dir"))
 			},
 		},
+		{
+			Name:  "rekey",
+			Usage: "reencrypts journal with a new password",
+			Flags: []cli.Flag{tempFlag},
+			Action: func(c *cli.Context) error {
+				config, err := readConfig(configPath)
+				if err != nil {
+					return err
+				}
+				password, err := getPassword("Old password: ")
+				if err != nil {
+					return err
+				}
+				oldDriver, err := storage.NewDriver(config, password)
+				if err != nil {
+					return err
+				}
+
+				tempConfig := config
+				tempConfig.StorageDirectory = fmt.Sprintf("%s/new-ejrnl", c.String("temp-dir"))
+				password, err = getPassword("New Password: ")
+				if err != nil {
+					return err
+				}
+				confirm, err := getPassword("Confirm:      ")
+				if err != nil {
+					return err
+				}
+				if password != confirm {
+					return errors.New("Passwords didn't match")
+				}
+				newDriver, err := storage.NewDriver(tempConfig, password)
+				if _, ok := err.(*storage.NeedsInit); !ok {
+					return err
+				}
+				if err = newDriver.Init(); err != nil {
+					return err
+				}
+				return workflows.Rekey(oldDriver, newDriver, config.StorageDirectory, tempConfig.StorageDirectory)
+			},
+		},
 	}
 	err := app.Run(os.Args)
 	if err != nil {

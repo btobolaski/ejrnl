@@ -1,10 +1,12 @@
-hash: 4d65fd74d96b75e517a71c25e6c0e8c1a6246be6d43cb1b13691c4c77d7ed746
-updated: 2016-12-25T22:59:43.209859856-06:00
+hash: f965e4810ca355e4ee218d07cb6ed396c47faee3cebcb76768c5d57050487027
+updated: 2016-12-26T21:59:00.634160572-06:00
 imports:
 - name: github.com/howeyc/gopass
   version: f5387c492211eb133053880d23dfae62aa14123d
 - name: github.com/satori/go.uuid
   version: b061729afc07e77a8aa4fad0a2fd840958f1942a
+- name: github.com/termie/go-shutil
+  version: bcacb06fecaeec8dc42af03c87c6949f4a05c74c
 - name: github.com/urfave/cli
   version: 0bdeddeeb0f650497d603c4ad7b20cfe685682f6
 - name: golang.org/x/crypto

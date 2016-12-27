@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/termie/go-shutil"
 	"gopkg.in/yaml.v2"
 
 	"code.tobolaski.com/brendan/ejrnl"
@@ -161,6 +162,34 @@ func EditEntry(driver ejrnl.Driver, id, tempDir string) error {
 	err = os.Remove(tempFile)
 	if err != nil {
 		fmt.Printf("an error was encountered, the editted file still exists at %s\n", tempFile)
+	}
+	return err
+}
+
+func Rekey(oldDriver, newDriver ejrnl.Driver, journalDir, tempDir string) error {
+	toTransfer, err := oldDriver.List()
+	if err != nil {
+		return err
+	}
+
+	for _, id := range toTransfer {
+		entry, err := oldDriver.Read(id)
+		if err != nil {
+			return err
+		}
+		err = newDriver.Write(entry)
+		if err != nil {
+			return err
+		}
+	}
+
+	if err = os.RemoveAll(journalDir); err != nil {
+		fmt.Printf("Failed to remove old journal directory, %s. Rekeyed journal is at %s", journalDir, tempDir)
+		return err
+	}
+	err = shutil.CopyTree(tempDir, journalDir, nil)
+	if err != nil {
+		fmt.Printf("Failed to rename %s to %s. Journal is in unknown state.\n", tempDir, journalDir)
 	}
 	return err
 }
