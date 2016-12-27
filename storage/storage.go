@@ -139,7 +139,15 @@ func (d *Driver) Read(id string) (ejrnl.Entry, error) {
 func (d *Driver) List() (map[time.Time]string, error) {
 	d.indexLock.RLock()
 	defer d.indexLock.RUnlock()
-	return d.readIndex()
+	index, err := d.readIndex()
+	if err != nil {
+		return map[time.Time]string{}, err
+	}
+	val := make(map[time.Time]string)
+	for key, value := range index {
+		val[key.Local()] = value
+	}
+	return val, nil
 }
 
 // readIndex reads the index from the disk. The caller must have at least a read lock on d.indexLock

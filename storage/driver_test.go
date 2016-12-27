@@ -4,6 +4,7 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
+	"log"
 	"os"
 	"testing"
 	"time"
@@ -81,7 +82,7 @@ func TestIncorrectPassword(t *testing.T) {
 }
 
 func compareEntries(first, second ejrnl.Entry) bool {
-	if *first.Date != *second.Date {
+	if !(*first.Date).Equal(*second.Date) {
 		return false
 	}
 	if first.Body != second.Body {
@@ -104,7 +105,7 @@ func compareEntries(first, second ejrnl.Entry) bool {
 func TestDriverRoundtrip(t *testing.T) {
 	t.Parallel()
 	conf := ejrnl.Config{
-		StorageDirectory: "../../../roundtrip-test",
+		StorageDirectory: "./roundtrip-test",
 		Salt:             makeSalt(32),
 		Pow:              12,
 	}
@@ -188,7 +189,7 @@ func TestRewriteDate(t *testing.T) {
 func TestIndexRecovery(t *testing.T) {
 	t.Parallel()
 	conf := ejrnl.Config{
-		StorageDirectory: "../../../recovery-test",
+		StorageDirectory: "./recovery-test",
 		Salt:             makeSalt(32),
 		Pow:              12,
 	}
@@ -219,12 +220,13 @@ func TestIndexRecovery(t *testing.T) {
 		t.Errorf("Failed to reinit driver because %s", err)
 		return
 	}
-	index, err := d.readIndex()
+	index, err := d.List()
 	if err != nil {
 		t.Errorf("Failed to read index because %s", err)
 		return
 	}
-	if index[*entry.Date] == "" {
+	if index[now.Local()] == "" {
+		log.Printf("listing: %v\ndate: %s", index, now)
 		t.Errorf("index did not contain previously written entry")
 		return
 	}
@@ -277,7 +279,7 @@ func TestDefaultDate(t *testing.T) {
 func TestDefaultId(t *testing.T) {
 	t.Parallel()
 	conf := ejrnl.Config{
-		StorageDirectory: "../default-id",
+		StorageDirectory: "./default-id",
 		Salt:             makeSalt(32),
 		Pow:              12,
 	}
@@ -305,8 +307,9 @@ func TestDefaultId(t *testing.T) {
 		t.Errorf("Failed to get a listing because %s", err)
 		return
 	}
-	read, err := d.Read(listing[date])
+	read, err := d.Read(listing[date.Local()])
 	if err != nil {
+		log.Printf("listing: %v\ndate: %s", listing, date.Local())
 		t.Errorf("Failed to read entry because %s", err)
 		return
 	}
