@@ -1,5 +1,7 @@
 # ejrnl
 
+[![Build Status](https://travis-ci.org/btobolaski/ejrnl.svg?branch=master)](https://travis-ci.org/btobolaski/ejrnl)
+
 ejrnl is a journaling application for the privacy concious. It stores all of your entries in an
 encrypted format.
 
