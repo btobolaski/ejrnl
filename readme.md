@@ -3,6 +3,22 @@
 ejrnl is a journaling application for the privacy concious. It stores all of your entries in an
 encrypted format.
 
+## Installing
+
+Install the go tool chain and then run `go get -u github.com/btobolaski/ejrnl/cmd/ejrnl`. You can
+then update it in the same way.
+
+## Developing
+
+You'll need additional tools:
+
+- make
+- [glide][1]
+
+[1]: https://glide.sh/
+
+Make any changes and then run `make` to run the tests and then compile ejrnl.
+
 ## Encryption details
 
 ejrnl uses the go standard library implementations whenever possible. ejrnl uses AEAD (GCM
