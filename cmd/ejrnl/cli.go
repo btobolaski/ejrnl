@@ -88,10 +88,18 @@ func main() {
 				if err != nil {
 					return err
 				}
-				password, err := getPassword()
+				password, err := getPassword("Password: ")
 				if err != nil {
 					return err
 				}
+				confirm, err := getPassword("Confirm:   ")
+				if err != nil {
+					return err
+				}
+				if password != confirm {
+					return errors.New("Passwords didn't match")
+				}
+				confirm = ""
 
 				driver, err := storage.NewDriver(config, password)
 				password = ""
@@ -189,8 +197,8 @@ func main() {
 	}
 }
 
-func getPassword() (string, error) {
-	fmt.Printf("Password: ")
+func getPassword(prompt string) (string, error) {
+	fmt.Printf(prompt)
 	raw, err := gopass.GetPasswd()
 	return string(raw), err
 }
@@ -210,7 +218,7 @@ func standardLoad(configPath string) (*storage.Driver, error) {
 	if err != nil {
 		return &storage.Driver{}, err
 	}
-	password, err := getPassword()
+	password, err := getPassword("Password: ")
 	if err != nil {
 		return &storage.Driver{}, err
 	}
