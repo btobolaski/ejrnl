@@ -16,8 +16,8 @@ import (
 
 	"github.com/satori/go.uuid"
 
-	"code.tobolaski.com/brendan/ejrnl"
-	"code.tobolaski.com/brendan/ejrnl/crypto"
+	"github.com/btobolaski/ejrnl"
+	"github.com/btobolaski/ejrnl/crypto"
 )
 
 type Driver struct {

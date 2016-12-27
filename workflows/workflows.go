@@ -16,7 +16,7 @@ import (
 	"github.com/termie/go-shutil"
 	"gopkg.in/yaml.v2"
 
-	"code.tobolaski.com/brendan/ejrnl"
+	"github.com/btobolaski/ejrnl"
 )
 
 func makeSalt(b int) string {

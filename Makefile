@@ -1,6 +1,6 @@
 ejrnl: vendor/golang.org cmd/ejrnl crypto storage workflows ejrnl.go
 	go test `./glide nv`
-	go build -o ejrnl code.tobolaski.com/brendan/ejrnl/cmd/ejrnl
+	go build -o ejrnl github.com/btobolaski/ejrnl/cmd/ejrnl
 
 glide.lock: glide glide.yaml
 	./glide update

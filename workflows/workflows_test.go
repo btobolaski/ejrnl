@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"code.tobolaski.com/brendan/ejrnl"
-	"code.tobolaski.com/brendan/ejrnl/storage"
+	"github.com/btobolaski/ejrnl"
+	"github.com/btobolaski/ejrnl/storage"
 )
 
 var exampleEntry = `date: 2016-12-24T00:32:58Z

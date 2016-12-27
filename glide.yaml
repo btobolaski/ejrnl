@@ -1,4 +1,4 @@
-package: code.tobolaski.com/brendan/ejrnl
+package: github.com/btobolaski/ejrnl
 import:
 - package: golang.org/x/crypto
   subpackages:

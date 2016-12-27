@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"code.tobolaski.com/brendan/ejrnl"
+	"github.com/btobolaski/ejrnl"
 )
 
 func makeSalt(b int) string {

@@ -14,9 +14,9 @@ import (
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 
-	"code.tobolaski.com/brendan/ejrnl"
-	"code.tobolaski.com/brendan/ejrnl/storage"
-	"code.tobolaski.com/brendan/ejrnl/workflows"
+	"github.com/btobolaski/ejrnl"
+	"github.com/btobolaski/ejrnl/storage"
+	"github.com/btobolaski/ejrnl/workflows"
 )
 
 var version = "0.0.1"
