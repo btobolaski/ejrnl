@@ -17,6 +17,7 @@ import (
 	"github.com/satori/go.uuid"
 
 	"github.com/btobolaski/ejrnl"
+	"github.com/btobolaski/ejrnl/compression"
 	"github.com/btobolaski/ejrnl/crypto"
 )
 
@@ -86,7 +87,7 @@ func (d *Driver) Write(entry ejrnl.Entry) error {
 	if err != nil {
 		return err
 	}
-	cyphertext, err := crypto.Encrypt(plaintext, d.key)
+	cyphertext, err := compression.CompressAndEncrypt(plaintext, d.key)
 	if err != nil {
 		return err
 	}
@@ -125,7 +126,7 @@ func (d *Driver) Read(id string) (ejrnl.Entry, error) {
 		return ejrnl.Entry{}, err
 	}
 
-	plaintext, err := crypto.Decrypt(bytes, d.key)
+	plaintext, err := compression.DecryptAndDecompress(bytes, d.key)
 	if err != nil {
 		return ejrnl.Entry{}, err
 	}
@@ -158,7 +159,7 @@ func (d *Driver) readIndex() (map[time.Time]string, error) {
 		return index, err
 	}
 
-	plaintext, err := crypto.Decrypt(cyphertext, d.key)
+	plaintext, err := compression.DecryptAndDecompress(cyphertext, d.key)
 	if err != nil {
 		return index, err
 	}
@@ -175,7 +176,7 @@ func (d *Driver) writeIndex(index map[time.Time]string) error {
 		return err
 	}
 
-	cyphertext, err := crypto.Encrypt(plaintext, d.key)
+	cyphertext, err := compression.CompressAndEncrypt(plaintext, d.key)
 	if err != nil {
 		return err
 	}

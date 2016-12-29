@@ -61,5 +61,5 @@ func Decrypt(cyphertext, key []byte) ([]byte, error) {
 
 	// aead pads the input data with null values at the beginning. Applications won't care about this
 	// padding so, we just remove them
-	return bytes.Replace(plaintext, []byte("\x00"), []byte{}, -1), err
+	return bytes.TrimLeft(plaintext, "\x00"), err
 }

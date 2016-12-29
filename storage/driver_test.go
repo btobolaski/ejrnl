@@ -331,3 +331,69 @@ func TestTildeExpand(t *testing.T) {
 		t.Error("Didn't expand ~ in the storage path")
 	}
 }
+
+func TestV1Decode(t *testing.T) {
+	t.Parallel()
+	conf := ejrnl.Config{
+		StorageDirectory: "./v1-decode-test",
+		Salt:             "W0qqYZBcZXo8yYudevU69F3bPblsg7zZ51hihbT+72w=",
+		Pow:              12,
+	}
+
+	d, err := NewDriver(conf, "password")
+	if err != nil {
+		t.Errorf("Failed to create driver because %s", err)
+		return
+	}
+
+	date := time.Date(2016, 12, 23, 2, 3, 4, 0, time.UTC)
+	entry := ejrnl.Entry{
+		Date: &date,
+		Body: "Hello",
+		Id:   "1111111111111111111",
+		Tags: []string{"test"},
+	}
+
+	read, err := d.Read(entry.Id)
+	if err != nil {
+		t.Errorf("Failed to read entry because %s", err)
+		return
+	}
+
+	if !compareEntries(entry, read) {
+		t.Errorf("Entries aren't equal \n%v\n%v", entry, read)
+	}
+}
+
+func TestV2Decode(t *testing.T) {
+	t.Parallel()
+	conf := ejrnl.Config{
+		StorageDirectory: "./v2-decode-test",
+		Salt:             "W0qqYZBcZXo8yYudevU69F3bPblsg7zZ51hihbT+72w=",
+		Pow:              12,
+	}
+
+	d, err := NewDriver(conf, "password")
+	if err != nil {
+		t.Errorf("Failed to create driver because %s", err)
+		return
+	}
+
+	date := time.Date(2016, 12, 23, 2, 3, 4, 0, time.UTC)
+	entry := ejrnl.Entry{
+		Date: &date,
+		Body: "Hello",
+		Id:   "1111111111111111111",
+		Tags: []string{"test"},
+	}
+
+	read, err := d.Read(entry.Id)
+	if err != nil {
+		t.Errorf("Failed to read entry because %s", err)
+		return
+	}
+
+	if !compareEntries(entry, read) {
+		t.Errorf("Entries aren't equal \n%v\n%v", entry, read)
+	}
+}
