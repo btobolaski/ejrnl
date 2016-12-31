@@ -16,7 +16,7 @@ tags:
 This is the body`
 
 func TestRead(t *testing.T) {
-	entry, err := read([]byte(exampleEntry))
+	entry, err := Read([]byte(exampleEntry))
 
 	if err != nil {
 		t.Errorf("Failed to parse the entry because %s", err)
@@ -35,12 +35,12 @@ func TestRead(t *testing.T) {
 }
 
 func TestRoundTrip(t *testing.T) {
-	entry, err := read([]byte(exampleEntry))
+	entry, err := Read([]byte(exampleEntry))
 	if err != nil {
 		t.Errorf("Failed to process example because %s", err)
 		return
 	}
-	display := format(entry)
+	display := Format(entry)
 	if display != exampleEntry {
 		t.Errorf("Formatted entry doesn't match expected.\ngot:      '%s'\nexpected: '%s'", display, exampleEntry)
 	}
@@ -49,7 +49,7 @@ func TestRoundTrip(t *testing.T) {
 func TestInit(t *testing.T) {
 	conf := ejrnl.Config{
 		StorageDirectory: "../workflow-init",
-		Salt:             makeSalt(32),
+		Salt:             MakeSalt(32),
 		Pow:              12,
 	}
 
@@ -69,7 +69,7 @@ func TestInit(t *testing.T) {
 func TestImport(t *testing.T) {
 	conf := ejrnl.Config{
 		StorageDirectory: "../workflow-import",
-		Salt:             makeSalt(32),
+		Salt:             MakeSalt(32),
 		Pow:              12,
 	}
 
@@ -109,7 +109,7 @@ func TestDefaultConfig(t *testing.T) {
 func TestListing(t *testing.T) {
 	conf := ejrnl.Config{
 		StorageDirectory: "../workflow-listing",
-		Salt:             makeSalt(32),
+		Salt:             MakeSalt(32),
 		Pow:              12,
 	}
 
@@ -145,7 +145,7 @@ func TestListing(t *testing.T) {
 		return
 	}
 
-	listing, sorted, err := listing(driver)
+	listing, sorted, err := Listing(driver)
 	if err != nil {
 		t.Errorf("Failed to get listing because %s", err)
 		return
@@ -158,7 +158,7 @@ func TestListing(t *testing.T) {
 func TestRekey(t *testing.T) {
 	conf := ejrnl.Config{
 		StorageDirectory: "../workflow-rekey",
-		Salt:             makeSalt(32),
+		Salt:             MakeSalt(32),
 		Pow:              12,
 	}
 
@@ -222,7 +222,7 @@ func TestRekey(t *testing.T) {
 		return
 	}
 
-	listing, sorted, err := listing(driver)
+	listing, sorted, err := Listing(driver)
 	if err != nil {
 		t.Errorf("Failed to get listing because %s", err)
 		return

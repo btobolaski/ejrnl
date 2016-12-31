@@ -19,7 +19,7 @@ import (
 	"github.com/btobolaski/ejrnl"
 )
 
-func makeSalt(b int) string {
+func MakeSalt(b int) string {
 	bytes := make([]byte, b)
 	_, err := rand.Read(bytes)
 	if err != nil {
@@ -34,7 +34,7 @@ func Import(path string, driver ejrnl.Driver) error {
 	if err != nil {
 		return err
 	}
-	entry, err := read(data)
+	entry, err := Read(data)
 	if err != nil {
 		return err
 	}
@@ -50,13 +50,13 @@ func Init(driver ejrnl.Driver) error {
 func DefaultConfig() ejrnl.Config {
 	return ejrnl.Config{
 		StorageDirectory: "~/ejrnl",
-		Salt:             makeSalt(64),
+		Salt:             MakeSalt(64),
 		Pow:              19,
 	}
 }
 
 func Print(driver ejrnl.Driver, count int) error {
-	listing, sorted, err := listing(driver)
+	listing, sorted, err := Listing(driver)
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func Print(driver ejrnl.Driver, count int) error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("%s\n\n-------------------------------------\n\n", format(entry))
+		fmt.Printf("%s\n\n-------------------------------------\n\n", Format(entry))
 	}
 	return nil
 }
@@ -79,7 +79,7 @@ func Print(driver ejrnl.Driver, count int) error {
 // ListEntries outputs the date and id of the most recent count of entries. If count <= 0, it
 // outputs all of the entries
 func ListEntries(driver ejrnl.Driver, count int) error {
-	index, sorted, err := listing(driver)
+	index, sorted, err := Listing(driver)
 	if err != nil {
 		return err
 	}
@@ -100,7 +100,7 @@ func NewEntry(driver ejrnl.Driver, tempDir string) error {
 	date := time.Now()
 	entry := ejrnl.Entry{Date: &date}
 	tempFile := strings.Replace(fmt.Sprintf("%s/%s.ejrnl", tempDir, date), " ", "-", -1)
-	err := ioutil.WriteFile(tempFile, []byte(format(entry)), 0600)
+	err := ioutil.WriteFile(tempFile, []byte(Format(entry)), 0600)
 	if err != nil {
 		return err
 	}
@@ -112,7 +112,7 @@ func NewEntry(driver ejrnl.Driver, tempDir string) error {
 	if err != nil {
 		return err
 	}
-	readEntry, err := read(bytes)
+	readEntry, err := Read(bytes)
 	if err != nil {
 		return err
 	}
@@ -135,7 +135,7 @@ func EditEntry(driver ejrnl.Driver, id, tempDir string) error {
 	}
 
 	tempFile := strings.Replace(fmt.Sprintf("%s/%s.ejrnl", tempDir, entry.Id), " ", "-", -1)
-	err = ioutil.WriteFile(tempFile, []byte(format(entry)), 0600)
+	err = ioutil.WriteFile(tempFile, []byte(Format(entry)), 0600)
 	if err != nil {
 		return err
 	}
@@ -149,7 +149,7 @@ func EditEntry(driver ejrnl.Driver, id, tempDir string) error {
 		fmt.Printf("an error was encountered, the editted file still exists at %s\n", tempFile)
 		return err
 	}
-	entry, err = read(bytes)
+	entry, err = Read(bytes)
 	if err != nil {
 		fmt.Printf("an error was encountered, the editted file still exists at %s\n", tempFile)
 		return err
@@ -210,9 +210,9 @@ func (ts timeSlice) Swap(i, j int) {
 	ts[j] = temp
 }
 
-// listing gets a listing of all of the entries and sorts the listing's index by reverse
+// Listing gets a listing of all of the entries and sorts the listing's index by reverse
 // chronological order
-func listing(driver ejrnl.Driver) (map[time.Time]string, []time.Time, error) {
+func Listing(driver ejrnl.Driver) (map[time.Time]string, []time.Time, error) {
 	listing, err := driver.List()
 	if err != nil {
 		return listing, []time.Time{}, nil
@@ -227,7 +227,8 @@ func listing(driver ejrnl.Driver) (map[time.Time]string, []time.Time, error) {
 }
 
 // read reads the expected format and returns the parsed value.
-func read(raw []byte) (ejrnl.Entry, error) {
+func Read(raw []byte) (ejrnl.Entry, error) {
+	raw = bytes.Replace(raw, []byte("\r"), []byte(""), -1)
 	parts := bytes.SplitN(raw, []byte("\n---\n"), 2)
 	if len(parts) != 2 {
 		return ejrnl.Entry{}, errors.New("Format didn't match expected")
@@ -244,7 +245,7 @@ func read(raw []byte) (ejrnl.Entry, error) {
 }
 
 // format formats the specified entry in the expected format
-func format(entry ejrnl.Entry) string {
+func Format(entry ejrnl.Entry) string {
 	body := entry.Body
 	entry.Body = ""
 

@@ -6,15 +6,18 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"os/signal"
 	"os/user"
 	"path"
 	"strings"
+	"syscall"
 
 	"github.com/howeyc/gopass"
 	"github.com/urfave/cli"
 	"gopkg.in/yaml.v2"
 
 	"github.com/btobolaski/ejrnl"
+	"github.com/btobolaski/ejrnl/server"
 	"github.com/btobolaski/ejrnl/storage"
 	"github.com/btobolaski/ejrnl/workflows"
 )
@@ -228,6 +231,43 @@ func main() {
 					return err
 				}
 				return workflows.Rekey(oldDriver, newDriver, config.StorageDirectory, tempConfig.StorageDirectory)
+			},
+		},
+		{
+			Name:  "server",
+			Usage: "Starts a local server",
+			Flags: []cli.Flag{
+				cli.IntFlag{
+					Name:  "port",
+					Usage: "Specify the port to listen on",
+					Value: 3000,
+				},
+			},
+			Action: func(c *cli.Context) error {
+				driver, err := standardLoad(configPath)
+				if err != nil {
+					return err
+				}
+				conf := server.Config{
+					Port:     c.Int("port"),
+					Username: "ejrnl",
+					Password: workflows.MakeSalt(15),
+				}
+				s, err := server.New(driver, conf)
+				if err != nil {
+					return err
+				}
+				err = s.Start()
+				if err != nil {
+					return err
+				}
+				fmt.Printf("Started server on port %d\n", conf.Port)
+				fmt.Printf("Username: %s\n", conf.Username)
+				fmt.Printf("Password: %s\n", conf.Password)
+				signalChan := make(chan os.Signal, 1)
+				signal.Notify(signalChan, os.Interrupt, os.Kill, syscall.SIGTERM)
+				<-signalChan
+				return nil
 			},
 		},
 	}

@@ -1,12 +1,22 @@
-hash: f83cbc70d582a74d9a57134f848187bdec4100508848fc32b59cf32ee95c6cd0
-updated: 2016-12-26T23:09:32.542157206-06:00
+hash: da3454015c1aa251ba3f884dd1ed45047aaa3ea956481a3e3aff941906ca262f
+updated: 2016-12-30T00:35:55.317830245-06:00
 imports:
+- name: github.com/99designs/basicauth-go
+  version: 2a93ba0f464da2a77748a1dc2e9e5bea8bbdd4b9
+- name: github.com/facebookgo/clock
+  version: 600d898af40aa09a7a93ecb9265d87b0504b6f03
+- name: github.com/facebookgo/httpdown
+  version: a3b1354551a26449fbe05f5d855937f6e7acbd71
+- name: github.com/facebookgo/stats
+  version: 1b76add642e42c6ffba7211ad7b3939ce654526e
 - name: github.com/howeyc/gopass
   version: f5387c492211eb133053880d23dfae62aa14123d
 - name: github.com/Masterminds/glide
   version: 84607742b10f492430762d038e954236bbaf23f7
+- name: github.com/pressly/chi
+  version: 5a8c2b83d3dbb4628a361cf2e8355a9ae6eba5a4
 - name: github.com/satori/go.uuid
-  version: b061729afc07e77a8aa4fad0a2fd840958f1942a
+  version: f9ab0dce87d815821e221626b772e3475a0d2749
 - name: github.com/termie/go-shutil
   version: bcacb06fecaeec8dc42af03c87c6949f4a05c74c
 - name: github.com/urfave/cli
@@ -18,9 +28,9 @@ imports:
   - scrypt
   - ssh/terminal
 - name: golang.org/x/sys
-  version: b699b7032584f0953262cb2788a0ca19bb494703
+  version: d4feaf1a7e61e1d9e79e6c4e76c6349e9cab0a03
   subpackages:
   - unix
 - name: gopkg.in/yaml.v2
-  version: a5b47d31c556af34a302ce5d659e6fea44d90de0
+  version: a83829b6f1293c91addabc89d0571c246397bbf4
 testImports: []

@@ -10,3 +10,6 @@ import:
 - package: github.com/termie/go-shutil
 - package: github.com/Masterminds/glide
   version: v0.12.3
+- package: github.com/99designs/basicauth-go
+- package: github.com/pressly/chi
+- package: github.com/facebookgo/httpdown
